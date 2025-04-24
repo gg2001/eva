@@ -39,11 +39,27 @@ else
 fi
 
 echo "➜ Fetching release info ($api)…"
-url=$(curl -fsSL "$api" | grep -Eo "https.*${TARGET}\.tar\.gz" | head -n1)
-[[ -z "$url" ]] && { echo "❌ asset $ASSET not found for $TARGET"; exit 1; }
 
-echo "➜ Downloading $ASSET…"
-curl -# -L "$url" -o "$TMPDIR/$ASSET"
+url=$(
+  curl -fsSL "$api" |
+    grep -oE '"browser_download_url":[[:space:]]*"[^"]*'"${TARGET}"'\.tar\.gz"' |
+    head -n1 |
+    cut -d'"' -f4
+)
+
+if [[ -z "$url" ]]; then
+  echo "❌ no binary for $TARGET in release $VERSION"
+  exit 1
+fi
+
+# Get asset name from URL
+asset_name=$(basename "$url")
+ASSET="${asset_name}"
+echo "Asset file: ${ASSET}"
+
+# Download the release asset
+echo "➜ Downloading ${ASSET}…"
+curl -# -L "$url" -o "${TMPDIR}/${ASSET}"
 
 # ─── Unpack binary ─────────────────────────────────────────────────────────────
 tar -xzf "$TMPDIR/$ASSET" -C "$TMPDIR"
@@ -64,4 +80,4 @@ echo "✅ eva installed to $INSTALL_DIR/eva"
 
 # ─── Test run ──────────────────────────────────────────────────────────────────
 echo
-"$INSTALL_DIR/eva" --help 2>&1 | head -n 20 || true
+# "$INSTALL_DIR/eva" --help 2>&1 | head -n 20 || true
