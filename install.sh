@@ -87,4 +87,4 @@ echo "✅ eva installed to $INSTALL_DIR/eva"
 
 # ─── Test run ──────────────────────────────────────────────────────────────────
 echo
-# "$INSTALL_DIR/eva" --help 2>&1 | head -n 20 || true
+"$INSTALL_DIR/eva" --version 2>&1 | head -n 20 || true
