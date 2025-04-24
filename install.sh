@@ -63,7 +63,14 @@ curl -# -L "$url" -o "${TMPDIR}/${ASSET}"
 
 # ─── Unpack binary ─────────────────────────────────────────────────────────────
 tar -xzf "$TMPDIR/$ASSET" -C "$TMPDIR"
-BIN_PATH=$(find "$TMPDIR" -type f -perm +111 -maxdepth 2 | head -n1)
+# Find the binary in a cross-platform way
+BIN_PATH=""
+for f in "$TMPDIR"/*; do
+  if [ -f "$f" ] && [ -x "$f" ]; then
+    BIN_PATH="$f"
+    break
+  fi
+done
 [[ -z "$BIN_PATH" ]] && { echo "❌ binary not found in archive"; exit 1; }
 
 # ─── Choose install dir ────────────────────────────────────────────────────────
